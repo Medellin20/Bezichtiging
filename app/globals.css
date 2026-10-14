@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42.00000000 35.71428571% 94.50980392%;
+    --foreground: 200.86956522 36.50793651% 12.35294118%;
+    --card: 0 0% 100%;
+    --card-foreground: 200.86956522 36.50793651% 12.35294118%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 200.86956522 36.50793651% 12.35294118%;
+    --primary: 201.25000000 47.05882353% 20.00000000%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 163.04347826 32.85714286% 27.45098039%;
+    --secondary-foreground: 0.00000000 0.00000000% 100.00000000%;
+    --muted: 41.53846154 25.49019608% 90.00000000%;
+    --muted-foreground: 198.26086957 12.16931217% 37.05882353%;
+    --accent: 12.19512195 57.74647887% 41.76470588%;
+    --accent-foreground: 0.00000000 0.00000000% 100.00000000%;
+    --destructive: 12.19512195 57.74647887% 41.76470588%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 110.00000000 7.50000000% 84.31372549%;
+    --input: 110.00000000 7.50000000% 84.31372549%;
+    --ring: 201.25000000 47.05882353% 20.00000000%;
+    --chart-1: 201.25000000 47.05882353% 20.00000000%;
+    --chart-2: 163.04347826 32.85714286% 27.45098039%;
+    --chart-3: 12.19512195 57.74647887% 41.76470588%;
+    --chart-4: 198.26086957 12.16931217% 37.05882353%;
+    --chart-5: 110.00000000 7.50000000% 84.31372549%;
+    --radius: 0.625rem;
+    --success: 163.04347826 32.85714286% 27.45098039%;
+    --success-foreground: 0 0% 100%;
+    --warning: 12.19512195 57.74647887% 41.76470588%;
+    --warning-foreground: 0 0% 100%;
+  }
+  .dark {
+    --background: 200.86956522 36.50793651% 12.35294118%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 14%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 14%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 42.00000000 35.71428571% 94.50980392%;
+    --primary-foreground: 200.86956522 36.50793651% 12.35294118%;
+    --secondary: 163.04347826 32.85714286% 27.45098039%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 163.04347826 32.85714286% 27.45098039%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 12.19512195 57.74647887% 41.76470588%;
+    --accent-foreground: 0.00000000 0.00000000% 100.00000000%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 20%;
+    --input: 217 33% 20%;
+    --ring: 42.00000000 35.71428571% 94.50980392%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    overflow-wrap: anywhere;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@layer base {
+  input, textarea, select { min-width: 0; }
+  ::selection { @apply bg-secondary text-secondary-foreground; }
+}
+
+@media (max-width: 639px) {
+  input, textarea, [role="combobox"] { font-size: 16px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

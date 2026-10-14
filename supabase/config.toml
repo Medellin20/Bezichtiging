@@ -1,0 +1,2 @@
+[functions.send-visit-notification]
+verify_jwt = false
