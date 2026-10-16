@@ -9,21 +9,6 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Bezichtiging aanvragen | RealEstate',
   description: "Vraag een bezichtiging aan voor een woning in Nederland bij RealEstate.",
-  openGraph: {
-    images: [
-      {
-        url: 'https://bolt.new/static/og_default.png',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    images: [
-      {
-        url: 'https://bolt.new/static/og_default.png',
-      },
-    ],
-  },
 };
 
 export default function RootLayout({
