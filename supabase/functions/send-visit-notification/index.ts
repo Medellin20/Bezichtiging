@@ -58,6 +58,7 @@ LOGEMENT CONCERNE
 - Type: ${request.housing_type || "Non renseigne"}
 - Adresse: ${request.housing_address || "Non renseignee"}
 - Reference: ${request.housing_reference || "Non renseignee"}
+- Lien de l'annonce: ${request.housing_link || "Non renseigne"}
 
 PREFERENCES DE VISITE
 - Date preferee: ${request.preferred_date || "Non renseignee"}

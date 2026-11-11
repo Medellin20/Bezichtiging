@@ -11,6 +11,7 @@ export interface VisitRequest {
   housing_type: string | null;
   housing_address: string | null;
   housing_reference: string | null;
+  housing_link: string | null;
   preferred_date: string | null;
   preferred_time: string | null;
   visit_type: string | null;
@@ -47,6 +48,7 @@ export interface VisitRequestInput {
   housing_type: string;
   housing_address: string;
   housing_reference: string;
+  housing_link: string;
   preferred_date: string;
   preferred_time: string;
   visit_type: string;

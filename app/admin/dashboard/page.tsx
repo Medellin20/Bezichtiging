@@ -27,6 +27,8 @@ import {
   Euro,
   Home,
   ExternalLink,
+  Link2,
+  Copy,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -94,6 +96,8 @@ export default function AdminDashboard() {
   const [settingsForm, setSettingsForm] = useState<Partial<PaymentSettings>>({});
   const [isSavingSettings, setIsSavingSettings] = useState(false);
   const [activeTab, setActiveTab] = useState('requests');
+  const [propertyUrl, setPropertyUrl] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
 
   const router = useRouter();
   const { toast } = useToast();
@@ -183,6 +187,26 @@ export default function AdminDashboard() {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.replace('/admin');
+  };
+
+  const updatePropertyUrl = (value: string) => {
+    setPropertyUrl(value);
+    setShareUrl('');
+    try {
+      const listing = new URL(value);
+      if (listing.protocol !== 'https:' && listing.protocol !== 'http:') return;
+      const formUrl = new URL('/', window.location.origin);
+      formUrl.searchParams.set('property_url', listing.toString());
+      setShareUrl(formUrl.toString());
+    } catch {
+      // Wait until a complete listing URL is entered.
+    }
+  };
+
+  const copyShareUrl = async () => {
+    if (!shareUrl) return;
+    await navigator.clipboard.writeText(shareUrl);
+    toast({ title: 'Gekopieerd', description: 'De link naar het aanvraagformulier is gekopieerd' });
   };
 
   const handleStatusChange = async (id: string, status: string) => {
@@ -329,7 +353,7 @@ export default function AdminDashboard() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="mb-6 grid w-full grid-cols-2 sm:inline-flex sm:w-auto">
+          <TabsList className="mb-6 grid w-full grid-cols-3 sm:inline-flex sm:w-auto">
             <TabsTrigger value="requests" className="gap-2">
               <LayoutDashboard className="w-4 h-4" />
               Aanvragen
@@ -337,6 +361,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="w-4 h-4" />
               Betalingsinstellingen
+            </TabsTrigger>
+            <TabsTrigger value="share" className="gap-2">
+              <Link2 className="w-4 h-4" />
+              Formulierlink
             </TabsTrigger>
           </TabsList>
 
@@ -436,6 +464,31 @@ export default function AdminDashboard() {
                     </TableBody>
                   </Table>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="share" className="animate-fade-in">
+            <Card className="max-w-2xl border-0 shadow-sm">
+              <CardHeader>
+                <CardTitle className="text-lg">Aanvraaglink voor een woning</CardTitle>
+                <CardDescription>Voeg de advertentielink toe en stuur het ingevulde formulier naar de klant.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="space-y-2">
+                  <Label htmlFor="property_url">Link van de woningadvertentie</Label>
+                  <Input id="property_url" type="url" placeholder="https://voorbeeld.nl/woning/123" value={propertyUrl} onChange={(event) => updatePropertyUrl(event.target.value)} />
+                </div>
+                {shareUrl && (
+                  <div className="space-y-2">
+                    <Label htmlFor="generated_form_url">Link om naar de klant te sturen</Label>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input id="generated_form_url" readOnly value={shareUrl} />
+                      <Button type="button" onClick={copyShareUrl} className="gap-2 shrink-0"><Copy className="w-4 h-4" /> Kopieer link</Button>
+                    </div>
+                    <p className="text-sm text-muted-foreground">De woninglink wordt automatisch ingevuld in het aanvraagformulier.</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -675,6 +728,9 @@ export default function AdminDashboard() {
                     <div><span className="text-muted-foreground">Referentie:</span> <span className="font-medium">{selectedRequest.housing_reference || "Niet opgegeven"}</span></div>
                     {selectedRequest.housing_address && (
                       <div className="sm:col-span-2"><span className="text-muted-foreground">Adres:</span> <span className="font-medium">{selectedRequest.housing_address}</span></div>
+                    )}
+                    {selectedRequest.housing_link && (
+                      <div className="sm:col-span-2"><span className="text-muted-foreground">Advertentie:</span>{' '}<a href={selectedRequest.housing_link} target="_blank" rel="noreferrer" className="font-medium text-primary hover:underline break-all">{selectedRequest.housing_link}</a></div>
                     )}
                   </div>
                 </div>

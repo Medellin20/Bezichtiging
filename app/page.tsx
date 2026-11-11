@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,6 +24,7 @@ import {
   Clock,
   Send,
   Loader2,
+  ExternalLink,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -65,6 +66,7 @@ const formSchema = z.object({
   housing_type: z.string().optional(),
   housing_address: z.string().optional(),
   housing_reference: z.string().optional(),
+  housing_link: z.string().optional(),
   preferred_date: z.string().min(1, "Kies een datum"),
   preferred_time: z.string().min(1, "Kies een tijdvak"),
   visit_type: z.string().min(1, "Kies een type bezichtiging"),
@@ -102,8 +104,24 @@ export default function VisitRequestForm() {
     handleSubmit,
     trigger,
     watch,
+    setValue,
     formState: { errors },
   } = methods;
+  const housingLink = watch('housing_link');
+  const safeHousingLink = (() => {
+    if (!housingLink) return null;
+    try {
+      const parsed = new URL(housingLink);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.toString() : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  useEffect(() => {
+    const propertyLink = new URLSearchParams(window.location.search).get('property_url');
+    if (propertyLink) setValue('housing_link', propertyLink, { shouldValidate: true });
+  }, [setValue]);
 
   const fetchPaymentSettings = async () => {
     const { data, error } = await supabase
@@ -127,7 +145,7 @@ export default function VisitRequestForm() {
   const stepFields: Record<number, (keyof FormData)[]> = {
     0: ['first_name', 'last_name', 'birth_date'],
     1: ['email', 'phone', 'address', 'city', 'postal_code'],
-    2: ['housing_type', 'housing_address', 'housing_reference'],
+    2: ['housing_type', 'housing_address', 'housing_reference', 'housing_link'],
     3: ['preferred_date', 'preferred_time', 'visit_type'],
     4: ['monthly_income', 'employment_situation', 'message'],
   };
@@ -166,6 +184,7 @@ export default function VisitRequestForm() {
         housing_type: data.housing_type || null,
         housing_address: data.housing_address || null,
         housing_reference: data.housing_reference || null,
+        housing_link: data.housing_link || null,
         preferred_date: data.preferred_date || null,
         preferred_time: data.preferred_time || null,
         visit_type: data.visit_type || null,
@@ -523,6 +542,24 @@ export default function VisitRequestForm() {
                     <div className="space-y-2">
                       <Label htmlFor="housing_reference">Woningreferentie</Label>
                       <Input id="housing_reference" placeholder="REF-2026-001" {...register('housing_reference')} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="housing_link">Link van de woning</Label>
+                      <Input id="housing_link" type="url" placeholder="https://..." {...register('housing_link')} />
+                      {safeHousingLink ? (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => copyToClipboard(safeHousingLink, 'De woninglink')}>
+                            <Copy className="w-4 h-4" /> Kopieer woninglink
+                          </Button>
+                          <Button asChild type="button" variant="outline" size="sm" className="gap-2">
+                            <a href={safeHousingLink} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" /> Bekijk de woning
+                            </a>
+                          </Button>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-muted-foreground">RealEstate heeft de advertentielink alvast ingevuld.</p>
+                      )}
                     </div>
                   </div>
                 )}
