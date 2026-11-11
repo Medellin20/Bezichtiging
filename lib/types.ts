@@ -24,6 +24,7 @@ export interface VisitRequest {
 
 export interface PaymentSettings {
   id: string;
+  property_url: string | null;
   rib_holder: string | null;
   rib_iban: string | null;
   rib_bic: string | null;

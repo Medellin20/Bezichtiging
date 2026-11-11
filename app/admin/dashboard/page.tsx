@@ -98,6 +98,7 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('requests');
   const [propertyUrl, setPropertyUrl] = useState('');
   const [shareUrl, setShareUrl] = useState('');
+  const [isSavingPropertyUrl, setIsSavingPropertyUrl] = useState(false);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -149,8 +150,9 @@ export default function AdminDashboard() {
     if (data) {
       setSettings(data as PaymentSettings);
       setSettingsForm(data as PaymentSettings);
+      setPropertyUrl((data as PaymentSettings).property_url || '');
     } else {
-      setSettingsForm({ visit_fee: 50, show_rib: true, show_payment_link: true });
+      setSettingsForm({ visit_fee: 50, show_rib: true, show_payment_link: true, property_url: null });
     }
   }, [toast]);
 
@@ -192,14 +194,37 @@ export default function AdminDashboard() {
   const updatePropertyUrl = (value: string) => {
     setPropertyUrl(value);
     setShareUrl('');
+  };
+
+  const addPropertyUrlToForm = async () => {
     try {
-      const listing = new URL(value);
-      if (listing.protocol !== 'https:' && listing.protocol !== 'http:') return;
-      const formUrl = new URL('/', window.location.origin);
-      formUrl.searchParams.set('property_url', listing.toString());
-      setShareUrl(formUrl.toString());
+      const listing = new URL(propertyUrl.trim());
+      if (listing.protocol !== 'https:' && listing.protocol !== 'http:') throw new Error('invalid url');
+      setIsSavingPropertyUrl(true);
+      const { data: existing, error: lookupError } = await supabase
+        .from('payment_settings')
+        .select('id')
+        .order('id')
+        .limit(1)
+        .maybeSingle();
+      if (lookupError) throw lookupError;
+
+      const saveQuery = existing
+        ? supabase.from('payment_settings').update({ property_url: listing.toString(), updated_at: new Date().toISOString() }).eq('id', existing.id)
+        : supabase.from('payment_settings').insert({ property_url: listing.toString() });
+      const { data, error } = await saveQuery.select('*').single();
+      if (error) throw error;
+
+      const savedSettings = data as PaymentSettings;
+      setSettings(savedSettings);
+      setSettingsForm((previous) => ({ ...previous, ...savedSettings }));
+      const formUrl = new URL('/', window.location.origin).toString();
+      setShareUrl(formUrl);
+      toast({ title: 'Woninglink bijgewerkt', description: 'De advertentie wordt nu automatisch op het openbare formulier getoond.' });
     } catch {
-      // Wait until a complete listing URL is entered.
+      toast({ title: 'Fout', description: 'De woninglink kan niet worden opgeslagen. Controleer de link en of de Supabase-migratie is toegepast.', variant: 'destructive' });
+    } finally {
+      setIsSavingPropertyUrl(false);
     }
   };
 
@@ -250,6 +275,7 @@ export default function AdminDashboard() {
         rib_bic: settingsForm.rib_bic || null,
         rib_bank_name: settingsForm.rib_bank_name || null,
         payment_link: settingsForm.payment_link || null,
+        property_url: settingsForm.property_url || null,
         visit_fee: fee,
         payment_instructions: settingsForm.payment_instructions || null,
         updated_at: new Date().toISOString(),
@@ -471,14 +497,17 @@ export default function AdminDashboard() {
           <TabsContent value="share" className="animate-fade-in">
             <Card className="max-w-2xl border-0 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-lg">Aanvraaglink voor een woning</CardTitle>
-                <CardDescription>Voeg de advertentielink toe en stuur het ingevulde formulier naar de klant.</CardDescription>
+                <CardTitle className="text-lg">Woninglink op de website</CardTitle>
+                <CardDescription>Sla de advertentie op om deze automatisch bovenaan het openbare aanvraagformulier te tonen.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="space-y-2">
                   <Label htmlFor="property_url">Link van de woningadvertentie</Label>
                   <Input id="property_url" type="url" placeholder="https://voorbeeld.nl/woning/123" value={propertyUrl} onChange={(event) => updatePropertyUrl(event.target.value)} />
                 </div>
+                <Button type="button" onClick={addPropertyUrlToForm} disabled={!propertyUrl.trim() || isSavingPropertyUrl} className="gap-2">
+                  {isSavingPropertyUrl ? <Loader2 className="w-4 h-4 animate-spin" /> : <Link2 className="w-4 h-4" />} Woninglink opslaan op de website
+                </Button>
                 {shareUrl && (
                   <div className="space-y-2">
                     <Label htmlFor="generated_form_url">Link om naar de klant te sturen</Label>
@@ -486,7 +515,7 @@ export default function AdminDashboard() {
                       <Input id="generated_form_url" readOnly value={shareUrl} />
                       <Button type="button" onClick={copyShareUrl} className="gap-2 shrink-0"><Copy className="w-4 h-4" /> Kopieer link</Button>
                     </div>
-                    <p className="text-sm text-muted-foreground">De woninglink wordt automatisch ingevuld in het aanvraagformulier.</p>
+                    <p className="text-sm text-muted-foreground">De opgeslagen woninglink wordt automatisch ingevuld op het openbare aanvraagformulier.</p>
                   </div>
                 )}
               </CardContent>

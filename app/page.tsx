@@ -120,7 +120,25 @@ export default function VisitRequestForm() {
 
   useEffect(() => {
     const propertyLink = new URLSearchParams(window.location.search).get('property_url');
-    if (propertyLink) setValue('housing_link', propertyLink, { shouldValidate: true });
+    if (propertyLink) {
+      setValue('housing_link', propertyLink, { shouldValidate: true });
+      return;
+    }
+
+    let isMounted = true;
+    supabase
+      .from('payment_settings')
+      .select('property_url')
+      .order('id')
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (isMounted && data?.property_url) {
+          setValue('housing_link', data.property_url, { shouldValidate: true });
+        }
+      });
+
+    return () => { isMounted = false; };
   }, [setValue]);
 
   const fetchPaymentSettings = async () => {
@@ -445,9 +463,8 @@ export default function VisitRequestForm() {
                 {safeHousingLink && (
                   <div className="mb-7 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
                     <p className="text-sm font-semibold text-primary">U vraagt een bezichtiging aan voor deze woning</p>
-                    <a href={safeHousingLink} target="_blank" rel="noopener noreferrer" className="mt-2 block break-all text-sm underline underline-offset-4 hover:text-primary">
-                      {safeHousingLink}
-                    </a>
+                    <Label htmlFor="prefilled_housing_link" className="mt-3 block">Woningadvertentie</Label>
+                    <Input id="prefilled_housing_link" value={safeHousingLink} readOnly className="mt-2 bg-white" />
                     <div className="mt-3 flex flex-wrap gap-2">
                       <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => copyToClipboard(safeHousingLink, 'De woninglink')}>
                         <Copy className="w-4 h-4" /> Kopieer woninglink
