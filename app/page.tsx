@@ -441,6 +441,24 @@ export default function VisitRequestForm() {
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)}>
               <CardContent className="p-6 sm:p-8">
+                {safeHousingLink && (
+                  <div className="mb-7 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
+                    <p className="text-sm font-semibold text-primary">U vraagt een bezichtiging aan voor deze woning</p>
+                    <a href={safeHousingLink} target="_blank" rel="noopener noreferrer" className="mt-2 block break-all text-sm underline underline-offset-4 hover:text-primary">
+                      {safeHousingLink}
+                    </a>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => copyToClipboard(safeHousingLink, 'De woninglink')}>
+                        <Copy className="w-4 h-4" /> Kopieer woninglink
+                      </Button>
+                      <Button asChild type="button" variant="outline" size="sm" className="gap-2">
+                        <a href={safeHousingLink} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-4 h-4" /> Bekijk de woning
+                        </a>
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Step 0: Informations personnelles */}
                 {currentStep === 0 && (
@@ -545,21 +563,8 @@ export default function VisitRequestForm() {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="housing_link">Link van de woning</Label>
-                      <Input id="housing_link" type="url" placeholder="https://..." {...register('housing_link')} />
-                      {safeHousingLink ? (
-                        <div className="flex flex-wrap gap-2 pt-1">
-                          <Button type="button" variant="outline" size="sm" className="gap-2" onClick={() => copyToClipboard(safeHousingLink, 'De woninglink')}>
-                            <Copy className="w-4 h-4" /> Kopieer woninglink
-                          </Button>
-                          <Button asChild type="button" variant="outline" size="sm" className="gap-2">
-                            <a href={safeHousingLink} target="_blank" rel="noopener noreferrer">
-                              <ExternalLink className="w-4 h-4" /> Bekijk de woning
-                            </a>
-                          </Button>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">RealEstate heeft de advertentielink alvast ingevuld.</p>
-                      )}
+                      <Input id="housing_link" type="url" placeholder="https://..." readOnly={!!safeHousingLink} {...register('housing_link')} />
+                      <p className="text-xs text-muted-foreground">U kunt de advertentie bovenaan deze stap bekijken of kopiëren.</p>
                     </div>
                   </div>
                 )}
