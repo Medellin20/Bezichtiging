@@ -145,7 +145,7 @@ export default function VisitRequestForm() {
   const stepFields: Record<number, (keyof FormData)[]> = {
     0: ['first_name', 'last_name', 'birth_date'],
     1: ['email', 'phone', 'address', 'city', 'postal_code'],
-    2: ['housing_type', 'housing_address', 'housing_reference', 'housing_link'],
+    2: ['housing_type', 'housing_address', 'housing_reference'],
     3: ['preferred_date', 'preferred_time', 'visit_type'],
     4: ['monthly_income', 'employment_situation', 'message'],
   };
@@ -440,6 +440,7 @@ export default function VisitRequestForm() {
         <Card className="border-0 shadow-xl animate-slide-up">
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)}>
+              <input type="hidden" {...register('housing_link')} />
               <CardContent className="p-6 sm:p-8">
                 {safeHousingLink && (
                   <div className="mb-7 rounded-xl border border-primary/20 bg-primary/5 p-4 sm:p-5">
@@ -560,11 +561,6 @@ export default function VisitRequestForm() {
                     <div className="space-y-2">
                       <Label htmlFor="housing_reference">Woningreferentie</Label>
                       <Input id="housing_reference" placeholder="REF-2026-001" {...register('housing_reference')} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="housing_link">Link van de woning</Label>
-                      <Input id="housing_link" type="url" placeholder="https://..." readOnly={!!safeHousingLink} {...register('housing_link')} />
-                      <p className="text-xs text-muted-foreground">U kunt de advertentie bovenaan deze stap bekijken of kopiëren.</p>
                     </div>
                   </div>
                 )}
